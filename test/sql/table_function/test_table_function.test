@@ -9,11 +9,11 @@ statement ok
 CREATE TABLE integers(i INTEGER, j INTEGER);
 
 # SELECT * from table function
-query ITTTTT
+query ITTTTTT
 SELECT * FROM pragma_table_info('integers');
 ----
-0	i	INTEGER	0	NULL	0
-1	j	INTEGER	0	NULL	0
+0	i	INTEGER	0	NULL	0	0
+1	j	INTEGER	0	NULL	0	0
 
 # project single column
 query T

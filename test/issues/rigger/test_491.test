@@ -12,8 +12,8 @@ CREATE TABLE t0(c0 INT);
 statement ok
 PRAGMA table_info('t0');
 
-query ITTTTT
+query ITTTTTT
 SELECT * FROM pragma_table_info('t0');
 ----
-0	c0	INTEGER	0	NULL	0
+0	c0	INTEGER	0	NULL	0	false
 

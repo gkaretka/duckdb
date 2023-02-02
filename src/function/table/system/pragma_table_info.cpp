@@ -50,6 +50,9 @@ static unique_ptr<FunctionData> PragmaTableInfoBind(ClientContext &context, Tabl
 	names.emplace_back("pk");
 	return_types.emplace_back(LogicalType::BOOLEAN);
 
+	names.emplace_back("unique");
+	return_types.emplace_back(LogicalType::BOOLEAN);
+
 	auto qname = QualifiedName::Parse(input.inputs[0].GetValue<string>());
 
 	// look up the table name in the catalog
@@ -62,10 +65,11 @@ unique_ptr<GlobalTableFunctionState> PragmaTableInfoInit(ClientContext &context,
 	return make_unique<PragmaTableOperatorData>();
 }
 
-static void CheckConstraints(TableCatalogEntry *table, const ColumnDefinition &column, bool &out_not_null,
-                             bool &out_pk) {
+static void CheckConstraints(TableCatalogEntry *table, const ColumnDefinition &column, bool &out_not_null, bool &out_pk,
+                             bool &out_unique) {
 	out_not_null = false;
 	out_pk = false;
+	out_unique = false;
 	// check all constraints
 	// FIXME: this is pretty inefficient, it probably doesn't matter
 	for (auto &constraint : table->bound_constraints) {
@@ -79,8 +83,13 @@ static void CheckConstraints(TableCatalogEntry *table, const ColumnDefinition &c
 		}
 		case ConstraintType::UNIQUE: {
 			auto &unique = (BoundUniqueConstraint &)*constraint;
-			if (unique.is_primary_key && unique.key_set.find(column.Logical()) != unique.key_set.end()) {
+			auto is_unique = unique.key_set.find(column.Logical()) != unique.key_set.end();
+			if (unique.is_primary_key && is_unique) {
+				// is primary key
 				out_pk = true;
+			} else if (is_unique) {
+				// is not primary key but still constrained to be unique
+				out_unique = true;
 			}
 			break;
 		}
@@ -101,11 +110,11 @@ static void PragmaTableInfoTable(PragmaTableOperatorData &data, TableCatalogEntr
 	output.SetCardinality(next - data.offset);
 
 	for (idx_t i = data.offset; i < next; i++) {
-		bool not_null, pk;
+		bool not_null, pk, unique;
 		auto index = i - data.offset;
 		auto &column = table->columns.GetColumn(LogicalIndex(i));
 		D_ASSERT(column.Oid() < (idx_t)NumericLimits<int32_t>::Maximum());
-		CheckConstraints(table, column, not_null, pk);
+		CheckConstraints(table, column, not_null, pk, unique);
 
 		// return values:
 		// "cid", PhysicalType::INT32
@@ -121,6 +130,8 @@ static void PragmaTableInfoTable(PragmaTableOperatorData &data, TableCatalogEntr
 		output.SetValue(4, index, def_value);
 		// "pk", PhysicalType::BOOL
 		output.SetValue(5, index, Value::BOOLEAN(pk));
+		// "unique", PhysicalType::BOOL
+		output.SetValue(6, index, Value::BOOLEAN(unique));
 	}
 	data.offset = next;
 }

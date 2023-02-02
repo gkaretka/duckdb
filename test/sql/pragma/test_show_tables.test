@@ -11,12 +11,34 @@ CREATE TABLE "select"(i INTEGER);
 statement ok
 CREATE VIEW v1 AS SELECT DATE '1992-01-01' AS k
 
+statement ok
+CREATE TABLE t1 (id INTEGER PRIMARY KEY, j VARCHAR)
+
+statement ok
+CREATE TABLE t2 (id INTEGER PRIMARY KEY, j VARCHAR UNIQUE)
+
+# column_name | column_type | null | key | default | extra
+query TTTITI
+DESCRIBE t1
+----
+id	INTEGER	NO	PRI	NULL	(empty)
+j	VARCHAR	YES	(empty)	NULL	(empty)
+
+# column_name | column_type | null | key | default | extra
+query TTTITI
+DESCRIBE t2
+----
+id	INTEGER	NO	PRI	NULL	(empty)
+j	VARCHAR	YES	(empty)	NULL	UNIQUE
+
 # SHOW and DESCRIBE are aliases
 query T
 SHOW TABLES
 ----
 integers
 select
+t1
+t2
 v1
 
 query T
@@ -24,6 +46,8 @@ DESCRIBE TABLES
 ----
 integers
 select
+t1
+t2
 v1
 
 # internally they are equivalent to PRAGMA SHOW_TABLES();
@@ -32,32 +56,34 @@ PRAGMA show_tables
 ----
 integers
 select
+t1
+t2
 v1
 
 # column_name | column_type | null | key | default | extra
 query TTTITI
 SHOW integers
 ----
-i	INTEGER	YES	NULL	NULL	NULL
-j	INTEGER	YES	NULL	NULL	NULL
+i	INTEGER	YES	(empty)	NULL	(empty)
+j	INTEGER	YES	(empty)	NULL	(empty)
 
 # column_name | column_type | null | key | default | extra
 query TTTITI
 SHOW "select";
 ----
-i	INTEGER	YES	NULL	NULL	NULL
+i	INTEGER	YES	(empty)	NULL	(empty)
 
 # equivalent to PRAGMA SHOW('integers')
 # column_name | column_type | null | key | default | extra
 query TTTITI
 PRAGMA SHOW('integers')
 ----
-i	INTEGER	YES	NULL	NULL	NULL
-j	INTEGER	YES	NULL	NULL	NULL
+i	INTEGER	YES	(empty)	NULL	(empty)
+j	INTEGER	YES	(empty)	NULL	(empty)
 
 # we can also describe views
 # column_name | column_type | null | key | default | extra
 query TTTITI
 DESCRIBE v1
 ----
-k	DATE	YES	NULL	NULL	NULL
+k	DATE	YES	(empty)	NULL	UNIQUE
