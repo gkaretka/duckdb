@@ -83,7 +83,8 @@ static void CheckConstraints(TableCatalogEntry *table, const ColumnDefinition &c
 		}
 		case ConstraintType::UNIQUE: {
 			auto &unique = (UniqueConstraint &)*constraint;
-			auto is_unique = std::find(unique.columns.begin(), unique.columns.end(), column.GetName()) != unique.columns.end();
+			auto is_unique =
+			    std::find(unique.columns.begin(), unique.columns.end(), column.GetName()) != unique.columns.end();
 			if (unique.is_primary_key && is_unique) {
 				// is primary key
 				out_pk = true;
