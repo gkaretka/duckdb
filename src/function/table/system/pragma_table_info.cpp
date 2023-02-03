@@ -4,8 +4,8 @@
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/catalog/catalog_entry/view_catalog_entry.hpp"
 #include "duckdb/parser/qualified_name.hpp"
-#include "duckdb/planner/constraints/bound_not_null_constraint.hpp"
-#include "duckdb/planner/constraints/bound_unique_constraint.hpp"
+#include "duckdb/parser/constraints/not_null_constraint.hpp"
+#include "duckdb/parser/constraints/unique_constraint.hpp"
 #include "duckdb/planner/expression/bound_parameter_expression.hpp"
 #include "duckdb/planner/binder.hpp"
 
@@ -72,18 +72,18 @@ static void CheckConstraints(TableCatalogEntry *table, const ColumnDefinition &c
 	out_unique = false;
 	// check all constraints
 	// FIXME: this is pretty inefficient, it probably doesn't matter
-	for (auto &constraint : table->bound_constraints) {
+	for (auto &constraint : table->GetConstraints()) {
 		switch (constraint->type) {
 		case ConstraintType::NOT_NULL: {
-			auto &not_null = (BoundNotNullConstraint &)*constraint;
-			if (not_null.index == column.Physical()) {
+			auto &not_null = (NotNullConstraint &)*constraint;
+			if (not_null.index == column.Logical()) {
 				out_not_null = true;
 			}
 			break;
 		}
 		case ConstraintType::UNIQUE: {
-			auto &unique = (BoundUniqueConstraint &)*constraint;
-			auto is_unique = unique.key_set.find(column.Logical()) != unique.key_set.end();
+			auto &unique = (UniqueConstraint &)*constraint;
+			auto is_unique = std::find(unique.columns.begin(), unique.columns.end(), column.GetName()) != unique.columns.end();
 			if (unique.is_primary_key && is_unique) {
 				// is primary key
 				out_pk = true;
@@ -100,19 +100,19 @@ static void CheckConstraints(TableCatalogEntry *table, const ColumnDefinition &c
 }
 
 static void PragmaTableInfoTable(PragmaTableOperatorData &data, TableCatalogEntry *table, DataChunk &output) {
-	if (data.offset >= table->columns.LogicalColumnCount()) {
+	if (data.offset >= table->GetColumns().LogicalColumnCount()) {
 		// finished returning values
 		return;
 	}
 	// start returning values
 	// either fill up the chunk or return all the remaining columns
-	idx_t next = MinValue<idx_t>(data.offset + STANDARD_VECTOR_SIZE, table->columns.LogicalColumnCount());
+	idx_t next = MinValue<idx_t>(data.offset + STANDARD_VECTOR_SIZE, table->GetColumns().LogicalColumnCount());
 	output.SetCardinality(next - data.offset);
 
 	for (idx_t i = data.offset; i < next; i++) {
 		bool not_null, pk, unique;
 		auto index = i - data.offset;
-		auto &column = table->columns.GetColumn(LogicalIndex(i));
+		auto &column = table->GetColumn(LogicalIndex(i));
 		D_ASSERT(column.Oid() < (idx_t)NumericLimits<int32_t>::Maximum());
 		CheckConstraints(table, column, not_null, pk, unique);
 
