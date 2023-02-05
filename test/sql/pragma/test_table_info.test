@@ -32,8 +32,8 @@ CREATE VIEW v1 AS SELECT 42::INTEGER AS a, 'hello' AS b
 query ITTTTTT
 PRAGMA table_info('v1')
 ----
-0	a	INTEGER	0	NULL	0	true
-1	b	VARCHAR	0	NULL	0	true
+0	a	INTEGER	0	NULL	0	false
+1	b	VARCHAR	0	NULL	0	false
 
 # view with explicit aliases
 statement ok
@@ -42,8 +42,8 @@ CREATE VIEW v2(c) AS SELECT 42::INTEGER AS a, 'hello' AS b
 query ITTTTTT
 PRAGMA table_info('v2')
 ----
-0	c	INTEGER	0	NULL	0	true
-1	b	VARCHAR	0	NULL	0	true
+0	c	INTEGER	0	NULL	0	false
+1	b	VARCHAR	0	NULL	0	false
 
 statement ok
 CREATE VIEW v3(c, d) AS SELECT DATE '1992-01-01', 'hello' AS b
@@ -51,8 +51,8 @@ CREATE VIEW v3(c, d) AS SELECT DATE '1992-01-01', 'hello' AS b
 query ITTTTTT
 PRAGMA table_info('v3')
 ----
-0	c	DATE	0	NULL	0	true
-1	d	VARCHAR	0	NULL	0	true
+0	c	DATE	0	NULL	0	false
+1	d	VARCHAR	0	NULL	0	false
 
 # test table info with other schemas
 statement ok
@@ -64,8 +64,8 @@ CREATE VIEW test.v1 AS SELECT 42::INTEGER AS a, 'hello' AS b
 query ITTTTTT
 PRAGMA table_info('test.v1')
 ----
-0	a	INTEGER	0	NULL	0	true
-1	b	VARCHAR	0	NULL	0	true
+0	a	INTEGER	0	NULL	0	false
+1	b	VARCHAR	0	NULL	0	false
 
 statement error
 PRAGMA table_info('nonexistant_table');

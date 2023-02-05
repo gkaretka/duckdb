@@ -26,9 +26,11 @@ statement ok
 CREATE VIEW test.v (b,c) AS SELECT * FROM test.t;
 
 # check the view info
-query II nosort view_info
+query IIIIIII nosort view_info
 PRAGMA table_info('test.v')
 ----
+0	b	INTEGER	false	NULL	false	false
+1	c	INTEGER	false	NULL	false	false
 
 statement ok
 SELECT * FROM test.v
@@ -37,9 +39,11 @@ statement ok
 DROP TABLE test.t
 
 # we can still query this after the table is gone
-query II nosort view_info
+query IIIIIII nosort view_info
 PRAGMA table_info('test.v')
 ----
+0	b	INTEGER	false	NULL	false	false
+1	c	INTEGER	false	NULL	false	false
 
 loop i 0 2
 
@@ -53,6 +57,8 @@ PRAGMA disable_checkpoint_on_shutdown
 query II nosort view_info
 PRAGMA table_info('test.v')
 ----
+0	b	INTEGER	false	NULL	false	false
+1	c	INTEGER	false	NULL	false	false
 
 statement error
 SELECT * FROM test.v

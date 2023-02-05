@@ -30,8 +30,8 @@ DROP TABLE test.t
 query IIIIIII
 PRAGMA table_info('test.v')
 ----
-0	a	INTEGER	0	NULL	0	true
-1	b	INTEGER	0	NULL	0	true
+0	a	INTEGER	0	NULL	0	false
+1	b	INTEGER	0	NULL	0	false
 
 # but querying the view fails
 statement error
@@ -48,8 +48,8 @@ restart
 query IIIIIII
 PRAGMA table_info('test.v')
 ----
-0	a	INTEGER	0	NULL	0	true
-1	b	INTEGER	0	NULL	0	true
+0	a	INTEGER	0	NULL	0	false
+1	b	INTEGER	0	NULL	0	false
 
 statement error
 SELECT * FROM test.v
@@ -67,8 +67,8 @@ SELECT * FROM test.v
 query IIIIIII
 PRAGMA table_info('test.v')
 ----
-0	a	INTEGER	0	NULL	0	true
-1	b	INTEGER	0	NULL	0	true
+0	a	INTEGER	0	NULL	0	false
+1	b	INTEGER	0	NULL	0	false
 
 # drop the table again
 statement ok

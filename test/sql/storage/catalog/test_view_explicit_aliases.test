@@ -17,9 +17,11 @@ statement ok
 CREATE VIEW test.v (b,c) AS SELECT * FROM test.t;
 
 # check the view info
-query II nosort view_info
+query IIIIIII nosort view_info
 PRAGMA table_info('test.v')
 ----
+0	a	INTEGER	0	NULL	0	false
+1	b	INTEGER	0	NULL	0	false
 
 statement ok
 SELECT * FROM test.v
@@ -28,9 +30,11 @@ statement ok
 DROP TABLE test.t
 
 # we can still query this after the table is gone
-query II nosort view_info
+query IIIIIII nosort view_info
 PRAGMA table_info('test.v')
 ----
+0	a	INTEGER	0	NULL	0	false
+1	b	INTEGER	0	NULL	0	false
 
 loop i 0 2
 
@@ -38,9 +42,11 @@ loop i 0 2
 restart
 
 # can check info, but not query the view
-query II nosort view_info
+query IIIIIII nosort view_info
 PRAGMA table_info('test.v')
 ----
+0	a	INTEGER	0	NULL	0	false
+1	b	INTEGER	0	NULL	0	false
 
 statement error
 SELECT * FROM test.v

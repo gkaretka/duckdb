@@ -86,4 +86,4 @@ j	INTEGER	YES	(empty)	NULL	(empty)
 query TTTITI
 DESCRIBE v1
 ----
-k	DATE	YES	(empty)	NULL	UNIQUE
+k	DATE	YES	(empty)	NULL	(empty)
