@@ -105,22 +105,25 @@ unique_ptr<DuckDBPyRelation> PyConnectionWrapper::FromDF(const DataFrame &value,
 unique_ptr<DuckDBPyRelation> PyConnectionWrapper::FromParquet(const string &file_glob, bool binary_as_string,
                                                               bool file_row_number, bool filename,
                                                               bool hive_partitioning, bool union_by_name,
+                                                              const py::object &compression,
                                                               shared_ptr<DuckDBPyConnection> conn) {
 	if (!conn) {
 		conn = DuckDBPyConnection::DefaultConnection();
 	}
-	return conn->FromParquet(file_glob, binary_as_string, file_row_number, filename, hive_partitioning, union_by_name);
+	return conn->FromParquet(file_glob, binary_as_string, file_row_number, filename, hive_partitioning, union_by_name,
+	                         compression);
 }
 
 unique_ptr<DuckDBPyRelation> PyConnectionWrapper::FromParquets(const vector<string> &file_globs, bool binary_as_string,
                                                                bool file_row_number, bool filename,
                                                                bool hive_partitioning, bool union_by_name,
+                                                               const py::object &compression,
                                                                shared_ptr<DuckDBPyConnection> conn) {
 	if (!conn) {
 		conn = DuckDBPyConnection::DefaultConnection();
 	}
-	return conn->FromParquets(file_globs, binary_as_string, file_row_number, filename, hive_partitioning,
-	                          union_by_name);
+	return conn->FromParquets(file_globs, binary_as_string, file_row_number, filename, hive_partitioning, union_by_name,
+	                          compression);
 }
 
 unique_ptr<DuckDBPyRelation> PyConnectionWrapper::FromArrow(py::object &arrow_object,
@@ -274,6 +277,13 @@ duckdb::pyarrow::Table PyConnectionWrapper::FetchArrow(idx_t chunk_size, shared_
 		conn = DuckDBPyConnection::DefaultConnection();
 	}
 	return conn->FetchArrow(chunk_size);
+}
+
+PolarsDataFrame PyConnectionWrapper::FetchPolars(idx_t chunk_size, shared_ptr<DuckDBPyConnection> conn) {
+	if (!conn) {
+		conn = DuckDBPyConnection::DefaultConnection();
+	}
+	return conn->FetchPolars(chunk_size);
 }
 
 duckdb::pyarrow::RecordBatchReader PyConnectionWrapper::FetchRecordBatchReader(const idx_t chunk_size,
